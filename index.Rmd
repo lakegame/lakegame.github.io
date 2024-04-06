@@ -1,0 +1,115 @@
+---
+title: "The Lake Game 2024"
+output: 
+  bookdown::html_document2:
+    collapsed: no
+    fig_caption: yes
+    highlight: espresso
+    number_sections: no
+    smooth_scroll: yes
+    theme: yeti
+    toc: no
+    toc_float: no
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+source("loading.R")
+
+```
+
+
+
+```{r data cleaning}
+
+# read data 
+data <- read.csv(here('The_Lake_Game-no_limits.csv'), na.strings="")
+data <- data[-1,]
+
+
+data <- data %>% select(c("c", "Emily.Yungwirth", "Emily.Yungwirth.xy", "Mermaid.man", "Mermaid.man.xy")) %>% rename(lake=c, coords.emily=Emily.Yungwirth.xy, coords.evan=Mermaid.man.xy)
+
+# pivot it
+data2 <- data %>% pivot_longer(cols=c("coords.emily", "coords.evan"), values_to="coords") %>% select(!c("name"))
+
+# regex insanity!!!
+data2$coords <- gsub("\\(", "", data2$coords)
+data2$coords <- gsub("\\)", "", data2$coords)
+data2$lat <- gsub("\\,.*", "", data2$coords)
+data2$lon <- gsub(".*\\,", "", data2$coords)
+data2$lat <- as.numeric(gsub(" ", "", data2$lat))
+data2$lon <- as.numeric(gsub(" ", "", data2$lon))
+
+# remove rows with all NAs 
+data3 <- data2 %>% filter(!is.na(coords)) %>% select(!c("coords")) %>% mutate(name=if_else(is.na(Mermaid.man), "Emily", "Evan")) %>% mutate(points = if_else(!is.na(Mermaid.man), Mermaid.man, Emily.Yungwirth))
+
+data4 <- data3 %>% mutate(sternum=1, 
+                 dunk=if_else(points>=2, 1, 0), 
+                 nude=if_else(points>=3, 1, 0),
+                 beer=if_else(points>=4, 1, 0),
+                 hike=if_else(points>=5, 1, 0)) %>%
+  select(!c("Emily.Yungwirth", "Mermaid.man"))
+
+ 
+
+```
+
+
+# Leaders
+***
+
+```{r leaderboard}
+summ <- data4 %>% select(c("lake", "name", "sternum", "dunk", "nude", "beer", "hike", "points")) %>% rename("total" = "points")
+  
+summ2 <- summ %>% group_by(name) %>% dplyr::summarize(Total = sum(total, na.rm=T)) %>% arrange(desc(Total)) %>% head(10)
+  
+
+knitr::kable(head(summ2))
+
+```
+
+# Map
+***
+
+```{r make the map}
+
+
+```
+
+
+
+# Category Leaders {.tabset}
+***
+
+## Hike
+```{r hike leaders}
+hike <- summ %>% group_by(name) %>% dplyr::summarize(Total = sum(hike, na.rm=T)) %>% arrange(desc(Total)) %>% head(10)
+knitr::kable(head(hike), caption="Hike Leaderboard")
+```
+
+
+## Nakey
+
+```{r nakey leaders}
+
+
+nude <- summ %>% group_by(name) %>% dplyr::summarize(Total = sum(nude, na.rm=T)) %>% arrange(desc(Total)) %>% head(10)
+knitr::kable(head(nude), caption="Nudity Leaderboard")
+
+```
+
+## Beers
+
+```{r beer leaders}
+
+beer <- summ %>% group_by(name) %>% dplyr::summarize(Total = sum(beer, na.rm=T)) %>% arrange(desc(Total)) %>% head(10)
+knitr::kable(head(beer), caption="Beer Leaderboard")
+
+
+```
+
+
+# Lake Game Rules
+
