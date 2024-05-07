@@ -3,7 +3,7 @@ title: "The Lake Game 2024"
 output: 
   html_document:
     includes:
-      before_body: header.html
+      in_header: header.html
     theme: yeti
     css: "bootstrap.css"
     #collapsed: no
@@ -17,55 +17,103 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 
-source("loading.R")
+library(pacman)
+p_load(here, ggplot2, ggspatial, sf, dplyr, tidyr, chroma, rnaturalearthdata, gsheet, plotly, DT)
+
 
 ```
 
-```{css, echo=FALSE}
-<nav class="navbar navbar-expand-lg bg-primary" data-bs-theme="dark">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="#">Navbar</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarColor01" aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarColor01">
-      <ul class="navbar-nav me-auto">
-        <li class="nav-item">
-          <a class="nav-link active" href="#">Home
-            <span class="visually-hidden">(current)</span>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#">Features</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#">Pricing</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#">About</a>
-        </li>
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Dropdown</a>
-          <div class="dropdown-menu">
-            <a class="dropdown-item" href="#">Action</a>
-            <a class="dropdown-item" href="#">Another action</a>
-            <a class="dropdown-item" href="#">Something else here</a>
-            <div class="dropdown-divider"></div>
-            <a class="dropdown-item" href="#">Separated link</a>
-          </div>
-        </li>
-      </ul>
-      <form class="d-flex">
-        <input class="form-control me-sm-2" type="search" placeholder="Search">
-        <button class="btn btn-secondary my-2 my-sm-0" type="submit">Search</button>
-      </form>
-    </div>
-  </div>
-</nav>
+
+```{r data download and cleaning}
+url <- construct_download_url("https://docs.google.com/spreadsheets/d/1tcSxnIrAz6tnGWijpZ35WQaOtFICSiVnFsOnugcX_wo/edit", format="csv")
+data <- gsheet2tbl(url)[-1,] # download and remove the example row
+data$points <- rowSums(data[,5:10])
 ```
 
 
-```{r data cleaning}
+# Leaderboards {.tabset}
+
+## Overall
+
+```{r leaderboard}
+summ <- data %>% group_by(name) %>% summarize(Total = sum(points)) %>% arrange(desc(Total)) %>% rename(Name=name)
+
+DT::datatable(summ, rownames=FALSE)
+
+```
+
+## Nudists
+
+```{r nudists}
+summ2 <- data %>% group_by(name) %>% summarize(Nudity_Points = sum(nude_1)) %>% arrange(desc(Nudity_Points)) %>% rename(Name=name)
+
+DT::datatable(summ2, rownames=FALSE)
+
+```
+
+## Drinkers
+
+```{r drinkers}
+summ3 <- data %>% group_by(name) %>% summarize(Shotguns = sum(beer_1)) %>% arrange(desc(Shotguns)) %>% rename(Name=name)
+
+DT::datatable(summ3, rownames=FALSE)
+
+```
+
+## Hikers
+
+```{r hikers}
+summ4 <- data %>% group_by(name) %>% summarize(Hikes = sum(hike_1)) %>% arrange(desc(Hikes)) %>% rename(Name=name)
+
+DT::datatable(summ4, rownames=FALSE)
+
+```
+
+## Cold
+
+```{r cold}
+summ5 <- data %>% group_by(name) %>% summarize(Cold_Points = sum(cold_points_0.5)) %>% arrange(desc(Cold_Points)) %>% rename(Name=name)
+
+DT::datatable(summ5, rownames=FALSE)
+
+```
+
+
+# Map
+
+```{r map, warning=FALSE}
+
+# get map layers
+map <- rnaturalearth::ne_states(c("united states of america", "canada"), returnclass = 'sf')
+world <- rnaturalearth::ne_countries(returnclass='sf')
+world <- sf::st_transform(world, crs=4326)
+can <- sf::st_transform(map, crs=4326)
+
+
+basemap <- world %>% filter(admin != "Canada", admin != "United States of America")  %>% 
+  ggplot() + 
+  geom_sf(color="grey50", fill="white", linewidth=0.3) +
+  geom_sf(data=can, color="grey50", fill="white", linewidth=0.3) + 
+  geom_spatial_point(data=data, aes(x=long, y=lat, group=waterbody, size=points, text=paste("player:", name)), 
+                     crs=4326, colour="navy", alpha=0.5) +
+  coord_sf(xlim=c(-160, -110), ylim=c(48, 70), default_crs = sf::st_crs(4326)) +
+  labs(x="Longitude (°E)", y="Latitude (°N)") +
+  scale_size(range=c(1.5,3)) +
+  theme_bw() + 
+  theme( panel.grid = element_blank(),
+         axis.text = element_blank(),
+         axis.ticks = element_blank(),
+         axis.title = element_blank(),
+         panel.border = element_rect(colour = "grey60", fill=NA, size=3),
+         panel.background = element_rect(fill='transparent'), 
+         plot.background = element_rect(fill='transparent'))
+
+ggplotly(basemap, tooltip=c("group", "text", "size")) %>% 
+  config(modeBarButtonsToRemove = c("lasso2d", "select2d", "autoscale2d", "hoverClosestCartesian", "hoverCompareCartesian"), scrollZoom = TRUE) %>% layout(dragmode='pan')
+
+```
+
+```{r OLD data cleaning, eval=FALSE}
 
 # read data 
 data <- read.csv(here('The_Lake_Game-no_limits.csv'), na.strings="")
@@ -99,58 +147,6 @@ data4 <- data3 %>% mutate(sternum=1,
 
 ```
 
-# Leaders
-
-------------------------------------------------------------------------
-
-```{r leaderboard}
-summ <- data4 %>% select(c("lake", "name", "sternum", "dunk", "nude", "beer", "hike", "points")) %>% rename("total" = "points")
-  
-summ2 <- summ %>% group_by(name) %>% dplyr::summarize(Total = sum(total, na.rm=T)) %>% arrange(desc(Total)) %>% head(10)
-  
-
-knitr::kable(head(summ2))
-
-```
-
-# Map
-
-------------------------------------------------------------------------
-
-```{r make the map}
-
-
-```
-
-# Category Leaders {.tabset}
-
-------------------------------------------------------------------------
-
-## Hike
-
-```{r hike leaders}
-hike <- summ %>% group_by(name) %>% dplyr::summarize(Total = sum(hike, na.rm=T)) %>% arrange(desc(Total)) %>% head(10)
-knitr::kable(head(hike), caption="Hike Leaderboard")
-```
-
-## Nakey
-
-```{r nakey leaders}
-
-
-nude <- summ %>% group_by(name) %>% dplyr::summarize(Total = sum(nude, na.rm=T)) %>% arrange(desc(Total)) %>% head(10)
-knitr::kable(head(nude), caption="Nudity Leaderboard")
-
-```
-
-## Beers
-
-```{r beer leaders}
-
-beer <- summ %>% group_by(name) %>% dplyr::summarize(Total = sum(beer, na.rm=T)) %>% arrange(desc(Total)) %>% head(10)
-knitr::kable(head(beer), caption="Beer Leaderboard")
-
-
-```
-
 # Lake Game Rules
+
+
