@@ -1,10 +1,9 @@
 ---
-title: "The Lake Game 2024"
+title: "&#32;"
 output: 
   html_document:
     includes:
       in_header: header.html
-    theme: yeti
     css: "bootstrap.css"
     #collapsed: no
     #fig_caption: yes
@@ -13,6 +12,8 @@ output:
     #toc: no
     #toc_float: no
 ---
+
+
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
@@ -23,28 +24,26 @@ p_load(here, ggplot2, ggspatial, sf, dplyr, tidyr, chroma, rnaturalearthdata, gs
 
 ```
 
-
 ```{r data download and cleaning}
 url <- construct_download_url("https://docs.google.com/spreadsheets/d/1tcSxnIrAz6tnGWijpZ35WQaOtFICSiVnFsOnugcX_wo/edit", format="csv")
 data <- gsheet2tbl(url)[-1,] # download and remove the example row
 data$points <- rowSums(data[,5:10])
 ```
 
-
-# Leaderboards {.tabset}
+# Leaderboards {.tabset .tabset-pills}
 
 ## Overall
 
-```{r leaderboard}
+```{r leaderboard, out.width="50%"}
 summ <- data %>% group_by(name) %>% summarize(Total = sum(points)) %>% arrange(desc(Total)) %>% rename(Name=name)
 
-DT::datatable(summ, rownames=FALSE)
+DT::datatable(summ, rownames=FALSE, class='order-column')
 
 ```
 
 ## Nudists
 
-```{r nudists}
+```{r nudists, out.width="50%"}
 summ2 <- data %>% group_by(name) %>% summarize(Nudity_Points = sum(nude_1)) %>% arrange(desc(Nudity_Points)) %>% rename(Name=name)
 
 DT::datatable(summ2, rownames=FALSE)
@@ -53,7 +52,7 @@ DT::datatable(summ2, rownames=FALSE)
 
 ## Drinkers
 
-```{r drinkers}
+```{r drinkers, out.width="50%"}
 summ3 <- data %>% group_by(name) %>% summarize(Shotguns = sum(beer_1)) %>% arrange(desc(Shotguns)) %>% rename(Name=name)
 
 DT::datatable(summ3, rownames=FALSE)
@@ -62,7 +61,7 @@ DT::datatable(summ3, rownames=FALSE)
 
 ## Hikers
 
-```{r hikers}
+```{r hikers, out.width="50%"}
 summ4 <- data %>% group_by(name) %>% summarize(Hikes = sum(hike_1)) %>% arrange(desc(Hikes)) %>% rename(Name=name)
 
 DT::datatable(summ4, rownames=FALSE)
@@ -71,13 +70,12 @@ DT::datatable(summ4, rownames=FALSE)
 
 ## Cold
 
-```{r cold}
+```{r cold, out.width="50%"}
 summ5 <- data %>% group_by(name) %>% summarize(Cold_Points = sum(cold_points_0.5)) %>% arrange(desc(Cold_Points)) %>% rename(Name=name)
 
 DT::datatable(summ5, rownames=FALSE)
 
 ```
-
 
 # Map
 
@@ -149,4 +147,4 @@ data4 <- data3 %>% mutate(sternum=1,
 
 # Lake Game Rules
 
-
+IYKYK (coming soon...)
