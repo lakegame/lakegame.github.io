@@ -5,11 +5,8 @@ output:
     includes:
       in_header: header.html
     css: "bootstrap.css"
-    #collapsed: no
-    #fig_caption: yes
-    #number_sections: no
-    #smooth_scroll: yes
-    #toc: no
+    smooth_scroll: yes
+    #toc: yes
     #toc_float: no
 ---
 
@@ -17,10 +14,12 @@ output:
 knitr::opts_chunk$set(echo = FALSE)
 
 library(pacman)
-p_load(here, ggplot2, ggspatial, sf, dplyr, tidyr, chroma, rnaturalearthdata, gsheet, plotly, DT)
+p_load(here, ggplot2, ggspatial, sf, dplyr, tidyr, chroma, rnaturalearthdata, gsheet, plotly, DT, kableExtra)
 
+options(DT.options = list(pageLength=5))
 
 ```
+
 
 ```{r data download and cleaning}
 url <- construct_download_url("https://docs.google.com/spreadsheets/d/1tcSxnIrAz6tnGWijpZ35WQaOtFICSiVnFsOnugcX_wo/edit", format="csv")
@@ -28,56 +27,92 @@ data <- gsheet2tbl(url)[-1,] # download and remove the example row
 data$points <- rowSums(data[,5:10])
 ```
 
-# Leaderboards {.tabset .tabset-pills}
+
+# Leaderboards {.tabset}
 
 ## Overall
 
-```{r leaderboard, out.width="50%"}
+```{r leaderboard}
 summ <- data %>% group_by(name) %>% summarize(Total = sum(points)) %>% arrange(desc(Total)) %>% rename(Name=name)
 
-DT::datatable(summ, rownames=FALSE, class='order-column')
+DT::datatable(summ, width='50%', rownames=FALSE, class='order-column',
+              options=list(autoWidth=TRUE, 
+                           columnDefs = list(list(className = 'dt-center',
+                                                  targets=c(1))), 
+                                             list(width='50px',
+                                                  targets=c(1))),
+                           
+) %>% DT::formatStyle(columns = colnames(summ), fontSize='14px')
 
 ```
 
 ## Nudists
 
-```{r nudists, out.width="50%"}
+```{r nudists}
 summ2 <- data %>% group_by(name) %>% summarize(Nudity_Points = sum(nude_1)) %>% arrange(desc(Nudity_Points)) %>% rename(Name=name)
 
-DT::datatable(summ2, rownames=FALSE)
+DT::datatable(summ2, width='50%', rownames=FALSE, class='order-column',
+              options=list(autoWidth=TRUE, 
+                           columnDefs = list(list(className = 'dt-center',
+                                                  targets=c(1))), 
+                                             list(width='50px',
+                                                  targets=c(1))),
+                           
+) %>% DT::formatStyle(columns = colnames(summ2), fontSize='14px')
 
 ```
 
 ## Drinkers
 
-```{r drinkers, out.width="50%"}
+```{r drinkers}
 summ3 <- data %>% group_by(name) %>% summarize(Shotguns = sum(beer_1)) %>% arrange(desc(Shotguns)) %>% rename(Name=name)
 
-DT::datatable(summ3, rownames=FALSE)
+DT::datatable(summ3, width='50%', rownames=FALSE, class='order-column',
+              options=list(autoWidth=TRUE, 
+                           columnDefs = list(list(className = 'dt-center',
+                                                  targets=c(1))), 
+                                             list(width='50px',
+                                                  targets=c(1))),
+                           
+) %>% DT::formatStyle(columns = colnames(summ3), fontSize='14px')
 
 ```
 
 ## Hikers
 
-```{r hikers, out.width="50%"}
+```{r hikers}
 summ4 <- data %>% group_by(name) %>% summarize(Hikes = sum(hike_1)) %>% arrange(desc(Hikes)) %>% rename(Name=name)
 
-DT::datatable(summ4, rownames=FALSE)
+DT::datatable(summ4, width='50%', rownames=FALSE, class='order-column',
+              options=list(autoWidth=TRUE, 
+                           columnDefs = list(list(className = 'dt-center',
+                                                  targets=c(1))), 
+                                             list(width='50px',
+                                                  targets=c(1))),
+                           
+) %>% DT::formatStyle(columns = colnames(summ4), fontSize='14px')
 
 ```
 
 ## Cold
 
-```{r cold, out.width="50%"}
+```{r cold}
 summ5 <- data %>% group_by(name) %>% summarize(Cold_Points = sum(cold_points_0.5)) %>% arrange(desc(Cold_Points)) %>% rename(Name=name)
 
-DT::datatable(summ5, rownames=FALSE)
+DT::datatable(summ5, width='50%', rownames=FALSE, class='order-column',
+              options=list(autoWidth=TRUE, 
+                           columnDefs = list(list(className = 'dt-center',
+                                                  targets=c(1))), 
+                                             list(width='50px',
+                                                  targets=c(1))),
+                           
+) %>% DT::formatStyle(columns = colnames(summ5), fontSize='14px')
 
 ```
 
 # Map
 
-```{r map, warning=FALSE, eval=FALSE}
+```{r map, warning=FALSE}
 
 # get map layers
 map <- rnaturalearth::ne_states(c("united states of america", "canada"), returnclass = 'sf')
@@ -145,6 +180,7 @@ data4 <- data3 %>% mutate(sternum=1,
 
 # Lake Game Rules
 
+
 A total of 5.5 points can be achieved in each **waterbody.**
 
 ***Point system:***
@@ -155,7 +191,7 @@ A total of 5.5 points can be achieved in each **waterbody.**
 
 3.  Dunk Head = 1
 
-4.  Shot Gun a Fizzy Bevvy = 1
+4.  Shotgun a Fizzy Bevvy = 1
 
 5.  Hike In = 1
 
@@ -167,4 +203,4 @@ A total of 5.5 points can be achieved in each **waterbody.**
 
 **Cold Points -**If ice is visible on water. Water below 6 degrees. BE SAFE.
 
-**Waterbody -** You can only get the total 5.5 points once in each location. In larger waterbodies (ie. rivers, inlets, coasts) must be 30 km away from each location.
+**Waterbody -** You can only get the maximum 5.5 points once in each location. If you visit a waterbody more than once, you can keep your highest score, but can not count it twice. In larger waterbodies (ie. rivers, inlets, coasts) each location must be 30 km apart.
