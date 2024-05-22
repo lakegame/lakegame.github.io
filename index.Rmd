@@ -13,8 +13,6 @@ output:
     #toc_float: no
 ---
 
-
-
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 
@@ -79,7 +77,7 @@ DT::datatable(summ5, rownames=FALSE)
 
 # Map
 
-```{r map, warning=FALSE}
+```{r map, warning=FALSE, eval=FALSE}
 
 # get map layers
 map <- rnaturalearth::ne_states(c("united states of america", "canada"), returnclass = 'sf')
@@ -147,4 +145,26 @@ data4 <- data3 %>% mutate(sternum=1,
 
 # Lake Game Rules
 
-IYKYK (coming soon...)
+A total of 5.5 points can be achieved in each **waterbody.**
+
+***Point system:***
+
+1.  Above Sternum = 1
+
+2.  Skinny Dip = 1
+
+3.  Dunk Head = 1
+
+4.  Shot Gun a Fizzy Bevvy = 1
+
+5.  Hike In = 1
+
+6.  Cold points = 0.5
+
+**Further Clarifications:**
+
+**Hike In -** Must have adequate struggle (Wreck Beach or walk around Seawall does not count).
+
+**Cold Points -**If ice is visible on water. Water below 6 degrees. BE SAFE.
+
+**Waterbody -** You can only get the total 5.5 points once in each location. In larger waterbodies (ie. rivers, inlets, coasts) must be 30 km away from each location.
