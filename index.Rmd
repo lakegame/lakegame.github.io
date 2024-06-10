@@ -112,7 +112,7 @@ DT::datatable(summ5, width='50%', rownames=FALSE, class='order-column',
 
 # Map
 
-```{r map, warning=FALSE}
+```{r map, warning=FALSE, eval = FALSE}
 
 # get map layers
 map <- rnaturalearth::ne_states(c("united states of america", "canada"), returnclass = 'sf')
