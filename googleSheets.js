@@ -22,6 +22,10 @@ function renderTable(node, data) {
   });
 }
 
+function sortData(data) {
+  return Object.entries(data).sort((a, b) => b[1] - a[1]);
+}
+
 // Function to display data
 async function displayData() {
   const data = await fetchData();
@@ -30,7 +34,6 @@ async function displayData() {
   const drinkerContainer = document.getElementById('drinkers');
   const hikerContainer = document.getElementById('hikers');
   const coldContainer = document.getElementById('cold');
-  container.innerHTML = '';
   const filteredData = {};
   const nudists = {};
   const drinkers = {};
@@ -47,19 +50,11 @@ async function displayData() {
     cold[row[0].trim()] = (cold[row[0].trim()] || 0) + Number(row[9]);
   });
 
-  // sort the data by the sum of the numeric values
-  const sortedData = Object.entries(filteredData).sort((a, b) => b[1] - a[1]);
-  const sortedNudists = Object.entries(nudists).sort((a, b) => b[1] - a[1]);
-  const sortedDrinkers = Object.entries(drinkers).sort((a, b) => b[1] - a[1]);
-  const sortedHikers = Object.entries(hikers).sort((a, b) => b[1] - a[1]);
-  const sortedCold = Object.entries(cold).sort((a, b) => b[1] - a[1]);
-  console.log(nudists, sortedNudists);
-
-  renderTable(container, sortedData);
-  renderTable(nudistContainer, sortedNudists);
-  renderTable(drinkerContainer, sortedDrinkers);
-  renderTable(hikerContainer, sortedHikers);
-  renderTable(coldContainer, sortedCold);
+  renderTable(container, sortData(filteredData));
+  renderTable(nudistContainer, sortData(nudists));
+  renderTable(drinkerContainer, sortData(drinkers));
+  renderTable(hikerContainer, sortData(hikers));
+  renderTable(coldContainer, sortData(cold));
 }
 
 // Fetch and display data on page load
