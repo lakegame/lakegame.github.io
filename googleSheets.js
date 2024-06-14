@@ -60,19 +60,6 @@ async function displayData() {
   renderTable(drinkerContainer, sortedDrinkers);
   renderTable(hikerContainer, sortedHikers);
   renderTable(coldContainer, sortedCold);
-
-  /*  sortedData.forEach(([key, value]) => {
-    const rowDiv = document.createElement('tr');
-    // create td for name and sum within rowDiv
-    rowDiv.innerHTML = `<td>${key}</td><td>${value}</td>`;
-    container.appendChild(rowDiv);
-  }); */
-
-  // create a google map with coordinates from each data row
-  const map = new google.maps.Map(document.getElementById('map'), {
-    zoom: 2,
-    center: { lat: 0, lng: 0 },
-  });
 }
 
 // Fetch and display data on page load
