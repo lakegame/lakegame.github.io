@@ -26,8 +26,63 @@ function sortData(data) {
   return Object.entries(data).sort((a, b) => b[1] - a[1]);
 }
 
+let markers = [];
+
+function removeMarkers() {
+  for (let i = 0; i < markers.length; i++) {
+    markers[i].setMap(null);
+  }
+}
+
+function displayGoogleMap(data, map) {
+  removeMarkers();
+
+  data.forEach((row) => {
+    const name = row[0];
+    const marker = new google.maps.Marker({
+      position: { lat: Number(row[2]), lng: Number(row[3]) },
+      map,
+
+      title: `${name} - ${row[1]}`,
+    });
+    markers.push(marker);
+  });
+}
+
+function handleFilterMapMarkersByName(data, name, map) {
+  // filter data by name
+  if (name === 'All') return displayGoogleMap(data, map);
+  const filteredData = data.filter((row) => row[0] === name);
+
+  displayGoogleMap(filteredData, map);
+}
+
+// create name dropdown
+function createNameDropdown(data, map) {
+  // remove first element of data array and get unique names
+  data.shift();
+  const uniqueNames = new Set(data.map((row) => row[0].trim()).sort());
+  // sort names alphabetically
+
+  const dropdown = document.getElementById('names');
+  dropdown.addEventListener('change', (event) => {
+    handleFilterMapMarkersByName(data, event.target.value, map);
+  });
+  uniqueNames.forEach((name) => {
+    const option = document.createElement('option');
+    option.value = name;
+    option.textContent = name;
+    dropdown.appendChild(option);
+  });
+}
+
 // Function to display data
 async function displayData() {
+  const map = new google.maps.Map(document.getElementById('map'), {
+    center: { lat: 53.537991, lng: -114.677098 },
+    zoom: 4,
+  });
+
   const data = await fetchData();
   const container = document.getElementById('overall');
   const nudistContainer = document.getElementById('nudists');
@@ -50,11 +105,13 @@ async function displayData() {
     cold[row[0].trim()] = (cold[row[0].trim()] || 0) + Number(row[9]);
   });
 
+  createNameDropdown(data, map);
   renderTable(container, sortData(filteredData));
   renderTable(nudistContainer, sortData(nudists));
   renderTable(drinkerContainer, sortData(drinkers));
   renderTable(hikerContainer, sortData(hikers));
   renderTable(coldContainer, sortData(cold));
+  displayGoogleMap(data, map);
 }
 
 // Fetch and display data on page load
