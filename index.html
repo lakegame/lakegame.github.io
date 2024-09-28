@@ -16,7 +16,10 @@
       integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
       crossorigin="anonymous"
     ></script>
-
+    <script
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAJgXqtZgIPQ8r9pwFHAJrBxw0NNrztmhw"
+      loading="async"
+    ></script>
     <title>Lake Game</title>
   </head>
   <body>
@@ -31,6 +34,15 @@
       </div>
     </div>
     <div class="container">
+      <div class="row justify-content-end">
+          <div class="col-md-4 col-sm-12 d-flex justify-content-end my-3">
+            <label for"names" class="form-label mt-2 me-2">Select a name:</label>
+            <select id="names" class="form-select w-50">
+              <option selected value="All">All</option>
+            </select>
+          </div>
+      </div>
+      <div id="map" class="mb-3" style="height: 700px"></div>
       <ul class="nav nav-tabs" id="tabs" role="tablist">
         <li class="nav-item" role="presentation">
           <button
