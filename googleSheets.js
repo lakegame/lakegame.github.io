@@ -104,7 +104,7 @@ async function displayData() {
     hikers[row[0].trim()] = (hikers[row[0].trim()] || 0) + Number(row[8]);
     cold[row[0].trim()] = (cold[row[0].trim()] || 0) + Number(row[9]);
   });
-  // console.log(data);
+
   createNameDropdown(data, map);
   renderTable(container, sortData(filteredData));
   renderTable(nudistContainer, sortData(nudists));
